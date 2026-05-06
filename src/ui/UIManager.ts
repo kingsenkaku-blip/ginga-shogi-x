@@ -288,6 +288,10 @@ export class UIManager {
               <small class="castle-notice">${this.castleNotice}</small>
             </div>
           </div>
+          <div class="title-password-panel">
+            <span>開発者メニュー</span>
+            <button type="button" data-command="open-debug-password">パスワード</button>
+          </div>
         </div>
       </section>
     `;
