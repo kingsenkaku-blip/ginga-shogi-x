@@ -92,12 +92,7 @@ export class UIManager {
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
   private forceIpadMode = false;
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
-  private forceIpadMode = false;
 
- main
- main
 
   constructor(
     private readonly root: HTMLElement,
@@ -108,13 +103,7 @@ export class UIManager {
     this.debugOpen = this.debugEnabled;
     this.ipadMode = UIManager.detectIpadMode();
     this.forceIpadMode = this.ipadMode;
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
 
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
-    this.forceIpadMode = this.ipadMode;
-
- main
-main
 
     window.addEventListener("keydown", (event) => {
       const target = event.target as HTMLElement | null;
@@ -138,18 +127,12 @@ main
     const ua = navigator.userAgent ?? "";
     return /iPad/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
- main
   private isIpadUiEnabled(): boolean {
     return this.forceIpadMode;
   }
 
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
 
 
- main
-main
   render(): void {
     if (this.game.phase === "title") {
       this.root.innerHTML = `
@@ -172,10 +155,6 @@ main
           <span class="brand-title">銀河将棋X</span>
           ${hero ? `<span class="hero-chip">${hero.name}</span>` : ""}
           ${this.renderDeviceModeSwitch()}
-          <div class="device-mode-switch" role="group" aria-label="表示モード">
-            <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "" : "active"}" data-command="set-normal-mode">通常</button>
-            <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "active" : ""}" data-command="set-ipad-mode">iPad</button>
-          </div>
           <span class="turn-pill">${
             this.game.phase === "gameover"
               ? "決着"
@@ -201,17 +180,6 @@ main
       <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
         ${
           this.isIpadUiEnabled()
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
-      <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
-        ${
-          this.isIpadUiEnabled()
-
-      <aside class="side-panel ${this.ipadMode ? "ipad-mode" : ""}">
-        ${
-          this.ipadMode
- main
- main
             ? `<div class="ipad-panel-switch" role="tablist" aria-label="iPad表示切替">
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "status" ? "active" : ""}" data-command="show-status-panel">戦況</button>
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "log" ? "active" : ""}" data-command="show-log-panel">ログ</button>
@@ -219,14 +187,6 @@ main
             : ""
         }
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
-
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
-        <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
-
-        <div class="status-panel-stack ${this.ipadMode && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
- main
-main
         <div class="panel-section">
           <h2>選択中</h2>
           ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
@@ -245,14 +205,6 @@ main
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
         </div>
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
-
- codex/add-log-and-game-state-buttons-for-ipad-gak0ri
-        <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
-
-        <div class="panel-section log-panel ${this.ipadMode && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
- main
- main
           <h2>行動ログ</h2>
           ${this.game.logs.map((entry) => this.renderLog(entry)).join("")}
         </div>
@@ -280,7 +232,6 @@ main
 
     return `
       <section class="title-screen title-splash">
-        <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="title-center">
           <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
@@ -333,7 +284,6 @@ main
           : { label: "メインキャラクター選択", title: "銀河将棋X" };
     return `
       <section class="title-screen title-character-screen">
-        <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="character-select">
           <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
@@ -359,13 +309,11 @@ main
     `;
   }
 
- codex/add-log-and-game-state-buttons-for-ipad-otdysq
   private renderGlobalDeviceSwitch(): string {
     return `<div class="global-device-switch">${this.renderDeviceModeSwitch()}</div>`;
   }
 
 
- main
   private renderHeroCard(hero: HeroDefinition): string {
     return `
       <button class="hero-card ${hero.id}" style="--hero-accent:${hero.accentColor}" data-start-hero="${hero.id}">
