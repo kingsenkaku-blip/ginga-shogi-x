@@ -132,6 +132,9 @@ button {
 }
 
 .title-device-mode {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
   position: absolute;
   top: 18px;
   right: 18px;
