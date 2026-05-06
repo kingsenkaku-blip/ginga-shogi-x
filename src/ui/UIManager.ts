@@ -296,6 +296,7 @@ export class UIManager {
     return `
       <section class="title-screen title-character-screen">
         <div class="title-orbit" aria-hidden="true"></div>
+        ${this.renderTitleLiveBoard()}
         <div class="character-select">
           <div class="character-heading">
             <span>${heading.label}</span>
