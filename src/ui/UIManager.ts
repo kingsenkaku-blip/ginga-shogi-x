@@ -236,6 +236,7 @@ export class UIManager {
     return `
       <section class="title-screen title-splash">
         <div class="title-orbit" aria-hidden="true"></div>
+        ${this.renderTitleLiveBoard()}
         <div class="title-center">
           <span class="title-kicker">Roguelike 3D Shogi</span>
           <h1 class="game-logo" aria-label="銀河将棋X">
@@ -306,6 +307,29 @@ export class UIManager {
           <button class="title-back-button" data-command="back-title">タイトルへ戻る</button>
         </div>
       </section>
+    `;
+  }
+
+  private renderTitleLiveBoard(): string {
+    const highlights = Array.from({ length: 7 }, (_, index) => {
+      const x = (Math.random() * 74 + 13).toFixed(2);
+      const y = (Math.random() * 64 + 20).toFixed(2);
+      const delay = (index * 0.55 + Math.random() * 0.8).toFixed(2);
+      const duration = (2.2 + Math.random() * 1.8).toFixed(2);
+      return `<span class="title-live-highlight" style="--x:${x}%;--y:${y}%;--delay:${delay}s;--dur:${duration}s"></span>`;
+    }).join("");
+    const sparks = Array.from({ length: 5 }, (_, index) => {
+      const x = (Math.random() * 68 + 16).toFixed(2);
+      const y = (Math.random() * 56 + 24).toFixed(2);
+      const delay = (index * 1.1 + Math.random() * 1.2).toFixed(2);
+      return `<span class="title-live-spark" style="--x:${x}%;--y:${y}%;--delay:${delay}s"></span>`;
+    }).join("");
+    return `
+      <div class="title-live-board" aria-hidden="true">
+        <div class="title-live-grid"></div>
+        <div class="title-live-highlights">${highlights}</div>
+        <div class="title-live-sparks">${sparks}</div>
+      </div>
     `;
   }
 
