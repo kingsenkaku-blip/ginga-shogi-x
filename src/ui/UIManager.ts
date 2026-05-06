@@ -95,6 +95,11 @@ export class UIManager {
   private selectedConversationVersion = "alpha";
   private castleNotice = "";
   private castleNoticeTimer: number | null = null;
+  private passwordOverlayOpen = false;
+  private passwordEntry = "";
+  private passwordFeedback: "idle" | "error" = "idle";
+  private passwordUnlocking = false;
+  private passwordDigitFlashUntil = 0;
 
 
   constructor(
@@ -141,6 +146,7 @@ export class UIManager {
       this.root.innerHTML = `
         ${this.renderTitleScreen()}
         ${this.renderGlobalDeviceSwitch()}
+        ${this.renderPasswordOverlay()}
         ${this.debugEnabled ? this.renderDebugConsole() : ""}
       `;
       this.bind();
@@ -214,6 +220,7 @@ export class UIManager {
       </aside>
 
       ${this.renderGlobalDeviceSwitch()}
+      ${this.renderPasswordOverlay()}
       ${this.renderSkillBanner()}
       ${this.renderEnemySkillBanner()}
       ${this.game.phase === "initiative" ? this.renderInitiativeOverlay() : ""}
@@ -277,6 +284,7 @@ export class UIManager {
                 <option value="alpha" ${this.selectedConversationVersion === "alpha" ? "selected" : ""}>アルファ</option>
               </select>
               <button type="button" data-command="open-castle-dialogue">館</button>
+              <button type="button" data-command="open-debug-password">パスワード</button>
               <small class="castle-notice">${this.castleNotice}</small>
             </div>
           </div>
@@ -517,6 +525,27 @@ export class UIManager {
           this.castleNoticeTimer = null;
           this.render();
         }, 1400);
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='open-debug-password']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.passwordOverlayOpen = true;
+        this.passwordEntry = "";
+        this.passwordFeedback = "idle";
+        this.passwordUnlocking = false;
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-password-digit]").forEach((button) => {
+      button.addEventListener("click", () => this.handlePasswordDigit(button.dataset.passwordDigit ?? ""));
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='close-password']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.passwordOverlayOpen = false;
+        this.passwordEntry = "";
+        this.passwordFeedback = "idle";
+        this.passwordUnlocking = false;
+        this.render();
       });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='conquest-next']").forEach((button) => {
@@ -894,6 +923,57 @@ export class UIManager {
           <button type="submit">RUN</button>
         </form>
       </section>
+    `;
+  }
+
+
+  private handlePasswordDigit(digit: string): void {
+    if (!this.passwordOverlayOpen || this.passwordUnlocking || !/^\d$/.test(digit)) return;
+    const pass = "1129";
+    const next = this.passwordEntry + digit;
+    if (!pass.startsWith(next)) {
+      this.passwordEntry = "";
+      this.passwordFeedback = "error";
+      this.render();
+      return;
+    }
+    this.passwordFeedback = "idle";
+    this.passwordEntry = next;
+    this.passwordDigitFlashUntil = Date.now() + 800;
+    this.render();
+    if (next.length === pass.length) {
+      this.passwordUnlocking = true;
+      this.debugEnabled = true;
+      this.debugOpen = false;
+      window.setTimeout(() => {
+        this.passwordUnlocking = false;
+        this.passwordOverlayOpen = false;
+        this.passwordEntry = "";
+        this.pushDebugLine("debug menu unlocked");
+        this.render();
+      }, 3200);
+    } else {
+      window.setTimeout(() => this.render(), 820);
+    }
+  }
+
+  private renderPasswordOverlay(): string {
+    if (!this.passwordOverlayOpen && !this.passwordUnlocking) return "";
+    const masked = `${this.passwordEntry}${"•".repeat(Math.max(0, 4 - this.passwordEntry.length))}`;
+    const flash = Date.now() < this.passwordDigitFlashUntil;
+    const matrixRows = Array.from({ length: 24 }, (_, row) => `<span style="--x:${(row / 24) * 100}%"></span>`).join("");
+    return `
+      <div class="overlay password-overlay ${this.passwordUnlocking ? "unlocking" : ""}">
+        <div class="password-shell">
+          <h3>DEBUG パスワード</h3>
+          <p class="password-display ${this.passwordFeedback === "error" ? "error" : ""}">${masked}</p>
+          <div class="password-keypad ${flash ? "flash" : ""}">
+            ${["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map((n) => `<button type="button" data-password-digit="${n}">${n}</button>`).join("")}
+          </div>
+          <button type="button" class="title-back-button" data-command="close-password">閉じる</button>
+        </div>
+        <div class="matrix-rain">${matrixRows}</div>
+      </div>
     `;
   }
 
