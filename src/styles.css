@@ -131,6 +131,17 @@ button {
   gap: 6px;
 }
 
+.title-device-mode {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 3;
+}
+
+.title-device-mode .device-mode-switch {
+  margin-top: 0;
+}
+
 .device-mode-button.active {
   background: rgba(242, 196, 93, 0.18);
   border-color: rgba(242, 196, 93, 0.5);

@@ -91,6 +91,7 @@ export class UIManager {
   private enemySkillBannerClearTimer: number | null = null;
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
+  private forceIpadMode = false;
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
   private forceIpadMode = false;
 
@@ -104,6 +105,7 @@ export class UIManager {
     this.debugEnabled = options.debugEnabled ?? false;
     this.debugOpen = this.debugEnabled;
     this.ipadMode = UIManager.detectIpadMode();
+    this.forceIpadMode = this.ipadMode;
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
     this.forceIpadMode = this.ipadMode;
 
@@ -159,6 +161,7 @@ export class UIManager {
         <div class="brand">
           <span class="brand-title">銀河将棋X</span>
           ${hero ? `<span class="hero-chip">${hero.name}</span>` : ""}
+          ${this.renderDeviceModeSwitch()}
           <div class="device-mode-switch" role="group" aria-label="表示モード">
             <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "" : "active"}" data-command="set-normal-mode">通常</button>
             <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "active" : ""}" data-command="set-ipad-mode">iPad</button>
@@ -185,6 +188,9 @@ export class UIManager {
         </div>
       </section>
 
+      <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
+        ${
+          this.isIpadUiEnabled()
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
       <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
         ${
@@ -200,6 +206,7 @@ export class UIManager {
               </div>`
             : ""
         }
+        <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
 
@@ -222,6 +229,7 @@ export class UIManager {
         ${this.renderCommandPanel()}
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
         </div>
+        <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
 
@@ -253,6 +261,7 @@ export class UIManager {
 
     return `
       <section class="title-screen title-splash">
+        <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="title-center">
           <span class="title-kicker">Roguelike 3D Shogi</span>
@@ -304,6 +313,7 @@ export class UIManager {
           : { label: "メインキャラクター選択", title: "銀河将棋X" };
     return `
       <section class="title-screen title-character-screen">
+        <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="character-select">
           <div class="character-heading">
@@ -316,6 +326,15 @@ export class UIManager {
           <button class="title-back-button" data-command="back-title">タイトルへ戻る</button>
         </div>
       </section>
+    `;
+  }
+
+  private renderDeviceModeSwitch(): string {
+    return `
+      <div class="device-mode-switch" role="group" aria-label="表示モード">
+        <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "" : "active"}" data-command="set-normal-mode">通常</button>
+        <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "active" : ""}" data-command="set-ipad-mode">iPad</button>
+      </div>
     `;
   }
 
