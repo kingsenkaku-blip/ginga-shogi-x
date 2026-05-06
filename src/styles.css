@@ -2117,25 +2117,6 @@ h3 {
   border-radius: 16px;
   padding: 20px;
 }
-.title-password-panel {
-  position: fixed;
-  top: calc(max(10px, env(safe-area-inset-top)) + 330px);
-  left: max(10px, env(safe-area-inset-left));
-  z-index: 70;
-  width: min(320px, calc(100vw - 20px - max(10px, env(safe-area-inset-left))));
-  display: grid;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 1px solid rgba(246, 239, 225, 0.16);
-  border-radius: 8px;
-  background: rgba(4, 9, 12, 0.64);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
-}
-.title-password-panel > span {
-  color: rgba(246, 239, 225, 0.76);
-  font-size: 11px;
-  font-weight: 700;
-}
 .password-display { letter-spacing: 0.4em; font-size: 1.4rem; color: #96ffa1; }
 .password-display.error { color: #ff6c78; }
 .password-keypad { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
