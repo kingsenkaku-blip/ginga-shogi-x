@@ -2101,7 +2101,7 @@ h3 {
 }
 
 .password-overlay {
-  position: fixed;
+　position: fixed;
   inset: 0;
   z-index: 220;
   backdrop-filter: blur(3px);
@@ -2116,7 +2116,6 @@ h3 {
   border: 1px solid #2a2f3f;
   border-radius: 16px;
   padding: 20px;
-  text-align: center;
 }
 .title-password-panel {
   position: fixed;
