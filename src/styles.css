@@ -112,6 +112,41 @@ button {
   font-weight: 800;
 }
 
+.device-mode-button {
+  width: auto;
+  margin-top: 0;
+  padding: 4px 9px;
+  border: 1px solid rgba(142, 231, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(142, 231, 255, 0.12);
+  color: #c7f3ff;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.device-mode-switch {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.title-device-mode {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.title-device-mode .device-mode-switch {
+  margin-top: 0;
+}
+
+.device-mode-button.active {
+  background: rgba(242, 196, 93, 0.18);
+  border-color: rgba(242, 196, 93, 0.5);
+  color: #ffe9b6;
+}
+
 .hp-row {
   display: grid;
   grid-template-columns: minmax(140px, 1fr) minmax(140px, 1fr);
@@ -168,6 +203,38 @@ button {
 .panel-section:last-child {
   border-bottom: 0;
   padding-bottom: 0;
+}
+
+.ipad-panel-switch {
+  display: none;
+}
+
+.hidden-on-ipad {
+  display: none;
+}
+
+.status-panel-stack {
+  min-height: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.ipad-panel-button {
+  flex: 1;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 246, 220, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(246, 239, 225, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ipad-panel-button.active {
+  background: rgba(242, 196, 93, 0.18);
+  border-color: rgba(242, 196, 93, 0.5);
+  color: #ffe9b6;
 }
 
 h2,
@@ -547,6 +614,20 @@ h3 {
 }
 
 .log-panel {
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.side-panel.ipad-mode {
+  grid-template-rows: auto minmax(0, 1fr) minmax(120px, 1fr);
+}
+
+.side-panel.ipad-mode .ipad-panel-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.side-panel.ipad-mode .status-panel-stack {
   overflow: auto;
   padding-right: 4px;
 }
