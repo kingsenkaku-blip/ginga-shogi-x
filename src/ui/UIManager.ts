@@ -150,7 +150,10 @@ export class UIManager {
         <div class="brand">
           <span class="brand-title">銀河将棋X</span>
           ${hero ? `<span class="hero-chip">${hero.name}</span>` : ""}
-          <button type="button" class="device-mode-button" data-command="toggle-ipad-mode">iPad表示: ${this.isIpadUiEnabled() ? "ON" : "OFF"}</button>
+          <div class="device-mode-switch" role="group" aria-label="表示モード">
+            <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "" : "active"}" data-command="set-normal-mode">通常</button>
+            <button type="button" class="device-mode-button ${this.isIpadUiEnabled() ? "active" : ""}" data-command="set-ipad-mode">iPad</button>
+          </div>
           <span class="turn-pill">${
             this.game.phase === "gameover"
               ? "決着"
@@ -484,9 +487,16 @@ export class UIManager {
         this.render();
       });
     });
-    this.root.querySelectorAll<HTMLButtonElement>("[data-command='toggle-ipad-mode']").forEach((button) => {
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='set-ipad-mode']").forEach((button) => {
       button.addEventListener("click", () => {
-        this.forceIpadMode = !this.forceIpadMode;
+        this.forceIpadMode = true;
+        this.ipadPanelView = "status";
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='set-normal-mode']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.forceIpadMode = false;
         this.ipadPanelView = "status";
         this.render();
       });
