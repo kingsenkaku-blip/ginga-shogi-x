@@ -283,14 +283,10 @@ export class UIManager {
               <select id="castle-version-select" data-role="castle-version-select">
                 <option value="alpha" ${this.selectedConversationVersion === "alpha" ? "selected" : ""}>アルファ</option>
               </select>
-              <button type="button" data-command="open-castle-dialogue">館</button>
               <button type="button" data-command="open-debug-password">パスワード</button>
+              <button type="button" data-command="open-castle-dialogue">館</button>
               <small class="castle-notice">${this.castleNotice}</small>
             </div>
-          </div>
-          <div class="title-password-panel">
-            <span>開発者メニュー</span>
-            <button type="button" data-command="open-debug-password">パスワード</button>
           </div>
         </div>
       </section>
