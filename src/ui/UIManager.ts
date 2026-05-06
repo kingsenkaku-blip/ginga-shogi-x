@@ -234,7 +234,6 @@ export class UIManager {
       <section class="title-screen title-splash">
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="title-center">
-          <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
           <span class="title-kicker">Roguelike 3D Shogi</span>
           <h1 class="game-logo" aria-label="銀河将棋X">
             <span>銀河将棋</span>
@@ -286,7 +285,6 @@ export class UIManager {
       <section class="title-screen title-character-screen">
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="character-select">
-          <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
           <div class="character-heading">
             <span>${heading.label}</span>
             <strong>${heading.title}</strong>
