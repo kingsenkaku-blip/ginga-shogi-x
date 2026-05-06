@@ -170,6 +170,38 @@ button {
   padding-bottom: 0;
 }
 
+.ipad-panel-switch {
+  display: none;
+}
+
+.hidden-on-ipad {
+  display: none;
+}
+
+.status-panel-stack {
+  min-height: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.ipad-panel-button {
+  flex: 1;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 246, 220, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(246, 239, 225, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ipad-panel-button.active {
+  background: rgba(242, 196, 93, 0.18);
+  border-color: rgba(242, 196, 93, 0.5);
+  color: #ffe9b6;
+}
+
 h2,
 h3,
 p {
@@ -547,6 +579,20 @@ h3 {
 }
 
 .log-panel {
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.side-panel.ipad-mode {
+  grid-template-rows: auto minmax(0, 1fr) minmax(120px, 1fr);
+}
+
+.side-panel.ipad-mode .ipad-panel-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.side-panel.ipad-mode .status-panel-stack {
   overflow: auto;
   padding-right: 4px;
 }
