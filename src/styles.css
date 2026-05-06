@@ -1490,6 +1490,39 @@ h3 {
   cursor: pointer;
 }
 
+.title-castle-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.title-castle-panel label {
+  color: rgba(246, 239, 225, 0.76);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.title-castle-panel select,
+.title-castle-panel button {
+  width: 100%;
+}
+
+.title-castle-panel select {
+  padding: 8px 10px;
+  border: 1px solid rgba(142, 231, 255, 0.36);
+  border-radius: 6px;
+  background: rgba(8, 16, 20, 0.92);
+  color: #e9fbff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.title-castle-panel .castle-notice {
+  min-height: 1.2em;
+  color: rgba(255, 222, 145, 0.94);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .character-select {
   width: min(760px, calc(100vw - 32px));
   display: grid;
