@@ -131,6 +131,21 @@ button {
   gap: 6px;
 }
 
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+.global-device-switch {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+  z-index: 70;
+  pointer-events: auto;
+}
+
+.global-device-switch .device-mode-switch {
+  margin-top: 0;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(5, 12, 14, 0.5);
+  border: 1px solid rgba(142, 231, 255, 0.26);
 .title-device-mode {
   display: flex;
   justify-content: center;
@@ -143,6 +158,7 @@ button {
 
 .title-device-mode .device-mode-switch {
   margin-top: 0;
+ main
 }
 
 .device-mode-button.active {

@@ -92,9 +92,11 @@ export class UIManager {
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
   private forceIpadMode = false;
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
   private forceIpadMode = false;
 
+ main
  main
 
   constructor(
@@ -106,10 +108,13 @@ export class UIManager {
     this.debugOpen = this.debugEnabled;
     this.ipadMode = UIManager.detectIpadMode();
     this.forceIpadMode = this.ipadMode;
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
     this.forceIpadMode = this.ipadMode;
 
  main
+main
 
     window.addEventListener("keydown", (event) => {
       const target = event.target as HTMLElement | null;
@@ -133,18 +138,23 @@ export class UIManager {
     const ua = navigator.userAgent ?? "";
     return /iPad/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
-
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
+ main
   private isIpadUiEnabled(): boolean {
     return this.forceIpadMode;
   }
 
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+
 
  main
+main
   render(): void {
     if (this.game.phase === "title") {
       this.root.innerHTML = `
         ${this.renderTitleScreen()}
+        ${this.renderGlobalDeviceSwitch()}
         ${this.debugEnabled ? this.renderDebugConsole() : ""}
       `;
       this.bind();
@@ -191,6 +201,7 @@ export class UIManager {
       <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
         ${
           this.isIpadUiEnabled()
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
       <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
         ${
@@ -200,6 +211,7 @@ export class UIManager {
         ${
           this.ipadMode
  main
+ main
             ? `<div class="ipad-panel-switch" role="tablist" aria-label="iPad表示切替">
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "status" ? "active" : ""}" data-command="show-status-panel">戦況</button>
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "log" ? "active" : ""}" data-command="show-log-panel">ログ</button>
@@ -207,11 +219,14 @@ export class UIManager {
             : ""
         }
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
 
         <div class="status-panel-stack ${this.ipadMode && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
  main
+main
         <div class="panel-section">
           <h2>選択中</h2>
           ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
@@ -230,16 +245,20 @@ export class UIManager {
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
         </div>
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+
  codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
 
         <div class="panel-section log-panel ${this.ipadMode && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
+ main
  main
           <h2>行動ログ</h2>
           ${this.game.logs.map((entry) => this.renderLog(entry)).join("")}
         </div>
       </aside>
 
+      ${this.renderGlobalDeviceSwitch()}
       ${this.renderSkillBanner()}
       ${this.renderEnemySkillBanner()}
       ${this.game.phase === "initiative" ? this.renderInitiativeOverlay() : ""}
@@ -340,6 +359,13 @@ export class UIManager {
     `;
   }
 
+ codex/add-log-and-game-state-buttons-for-ipad-otdysq
+  private renderGlobalDeviceSwitch(): string {
+    return `<div class="global-device-switch">${this.renderDeviceModeSwitch()}</div>`;
+  }
+
+
+ main
   private renderHeroCard(hero: HeroDefinition): string {
     return `
       <button class="hero-card ${hero.id}" style="--hero-accent:${hero.accentColor}" data-start-hero="${hero.id}">
