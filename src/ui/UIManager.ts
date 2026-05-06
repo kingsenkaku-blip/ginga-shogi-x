@@ -89,6 +89,8 @@ export class UIManager {
   private activeEnemySkillBannerExpiresAt = 0;
   private skillBannerClearTimer: number | null = null;
   private enemySkillBannerClearTimer: number | null = null;
+  private readonly ipadMode: boolean;
+  private ipadPanelView: "status" | "log" = "status";
 
   constructor(
     private readonly root: HTMLElement,
@@ -97,6 +99,7 @@ export class UIManager {
   ) {
     this.debugEnabled = options.debugEnabled ?? false;
     this.debugOpen = this.debugEnabled;
+    this.ipadMode = UIManager.detectIpadMode();
 
     window.addEventListener("keydown", (event) => {
       const target = event.target as HTMLElement | null;
@@ -113,6 +116,12 @@ export class UIManager {
         this.render();
       }
     });
+  }
+
+  private static detectIpadMode(): boolean {
+    if (typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent ?? "";
+    return /iPad/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
 
   render(): void {
@@ -157,7 +166,16 @@ export class UIManager {
         </div>
       </section>
 
-      <aside class="side-panel">
+      <aside class="side-panel ${this.ipadMode ? "ipad-mode" : ""}">
+        ${
+          this.ipadMode
+            ? `<div class="ipad-panel-switch" role="tablist" aria-label="iPad表示切替">
+                <button type="button" class="ipad-panel-button ${this.ipadPanelView === "status" ? "active" : ""}" data-command="show-status-panel">戦況</button>
+                <button type="button" class="ipad-panel-button ${this.ipadPanelView === "log" ? "active" : ""}" data-command="show-log-panel">ログ</button>
+              </div>`
+            : ""
+        }
+        <div class="status-panel-stack ${this.ipadMode && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
         <div class="panel-section">
           <h2>選択中</h2>
           ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
@@ -174,7 +192,8 @@ export class UIManager {
         </div>
         ${this.renderCommandPanel()}
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
-        <div class="panel-section log-panel">
+        </div>
+        <div class="panel-section log-panel ${this.ipadMode && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
           <h2>行動ログ</h2>
           ${this.game.logs.map((entry) => this.renderLog(entry)).join("")}
         </div>
@@ -444,6 +463,18 @@ export class UIManager {
           else if (this.startMode === "demonCastle") this.game.startDemonCastleRunWithHero(heroId);
           else this.game.startGameWithHero(heroId);
         }
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='show-log-panel']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.ipadPanelView = "log";
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='show-status-panel']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.ipadPanelView = "status";
+        this.render();
       });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='confirm-initiative']").forEach((button) => {
