@@ -603,7 +603,7 @@ export class GameManager {
     this.towerRun.isBossFloor = isDemonCastle ? isDemonCastleBossFloor(floor) : isTowerBossFloor(floor);
     this.towerRun.lastFloorResult = null;
     this.towerRun.bossQuote = null;
-    this.towerRun.bossScenario = isDemonCastle ? (DEMON_CASTLE_BOSSES[floor]?.scenarioBefore ?? null) : null;
+    this.towerRun.bossScenario = isDemonCastle ? this.composeBossScenarioLines(DEMON_CASTLE_BOSSES[floor]?.scenarioBeforeLines) : null;
     this.towerRun.elevatorNotice = null;
 
     this.applyTowerDifficultySetup(floor, isDemonCastle);
@@ -615,7 +615,7 @@ export class GameManager {
         else this.placeTerrain(terrain, 1, "ai");
       }
       this.log(`${floor}F BOSS: ${boss.name} 出現。${boss.description}`, "danger");
-      if (isDemonCastle && DEMON_CASTLE_BOSSES[floor]) this.log(DEMON_CASTLE_BOSSES[floor].scenarioBefore, "danger");
+      if (isDemonCastle && DEMON_CASTLE_BOSSES[floor]) this.logBossScenarioLines(DEMON_CASTLE_BOSSES[floor].scenarioBeforeLines, "danger");
     } else {
       this.log(`${floor}F: ${this.towerRun.enemyName} が立ちはだかります。HP ${enemyMaxHp} / 難易度TIER ${difficultyTier}`, "ai");
     }
@@ -656,6 +656,16 @@ export class GameManager {
 
   private pickDemonCastleName(): string {
     return DEMON_CASTLE_COMMON_NAMES[Math.floor(Math.random() * DEMON_CASTLE_COMMON_NAMES.length)] ?? "城壁の魔兵";
+  }
+
+  private composeBossScenarioLines(lines?: string[]): string | null {
+    if (!lines || lines.length === 0) return null;
+    return lines.join("\n");
+  }
+
+  private logBossScenarioLines(lines: string[] | undefined, level: LogTone): void {
+    if (!lines || lines.length === 0) return;
+    for (const line of lines) this.log(line, level);
   }
 
   private applyHeroPassiveStartOfTurn(owner: PlayerId): void {
@@ -2209,7 +2219,7 @@ export class GameManager {
       this.winner = "player";
       this.phase = "gameover";
       if (isDemonCastle) {
-        this.towerRun.bossScenario = DEMON_CASTLE_BOSSES[clearedFloor]?.scenarioAfter ?? "乗っ取られ魔王城は解放されました。";
+        this.towerRun.bossScenario = this.composeBossScenarioLines(DEMON_CASTLE_BOSSES[clearedFloor]?.scenarioAfterLines) ?? "乗っ取られ魔王城は解放されました。";
         this.log("乗っ取られ魔王城を完全制覇。玉座の呪いが解けました。", "player");
         this.log("真魔王ボランティアを撃破。魔王城は取り戻されました。", "system");
         return;
@@ -2235,8 +2245,8 @@ export class GameManager {
     const boss = DEMON_CASTLE_BOSSES[clearedFloor];
     if (!boss) return;
 
-    this.towerRun.bossScenario = boss.scenarioAfter;
-    this.log(boss.scenarioAfter, "system");
+    this.towerRun.bossScenario = this.composeBossScenarioLines(boss.scenarioAfterLines) ?? boss.scenarioAfter;
+    this.logBossScenarioLines(boss.scenarioAfterLines, "system");
     if (boss.demonAttackGain <= 0) {
       this.log(`${boss.name}は仲間になりませんでした。魔人攻撃の強化はありません。`, "danger");
       return;

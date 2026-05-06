@@ -625,7 +625,7 @@ export class UIManager {
             : ""
         }
         ${tower.elevatorNotice ? `<p class="tower-quote elevator">${this.escapeHtml(tower.elevatorNotice)}</p>` : ""}
-        ${tower.bossScenario ? `<p class="tower-scenario">${this.escapeHtml(tower.bossScenario)}</p>` : ""}
+        ${tower.bossScenario ? `<p class="tower-scenario">${this.escapeHtml(tower.bossScenario).replace(/\n/g, "<br />")}</p>` : ""}
         ${tower.bossQuote ? `<p class="tower-quote">${this.escapeHtml(tower.bossQuote)}</p>` : ""}
         <div class="tag-list compact tower-rewards">${rewards}</div>
       </div>
