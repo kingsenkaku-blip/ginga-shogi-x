@@ -92,6 +92,9 @@ export class UIManager {
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
   private forceIpadMode = false;
+  private selectedConversationVersion = "alpha";
+  private castleNotice = "";
+  private castleNoticeTimer: number | null = null;
 
 
   constructor(
@@ -234,7 +237,6 @@ export class UIManager {
       <section class="title-screen title-splash">
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="title-center">
-          <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
           <span class="title-kicker">Roguelike 3D Shogi</span>
           <h1 class="game-logo" aria-label="銀河将棋X">
             <span>銀河将棋</span>
@@ -268,6 +270,14 @@ export class UIManager {
               <button type="button" data-command="save-meta">セーブ</button>
               <button type="button" data-command="load-meta">ロード</button>
             </div>
+            <div class="title-castle-panel">
+              <label for="castle-version-select">会話バージョン</label>
+              <select id="castle-version-select" data-role="castle-version-select">
+                <option value="alpha" ${this.selectedConversationVersion === "alpha" ? "selected" : ""}>アルファ</option>
+              </select>
+              <button type="button" data-command="open-castle-dialogue">館</button>
+              <small class="castle-notice">${this.castleNotice}</small>
+            </div>
           </div>
         </div>
       </section>
@@ -286,7 +296,6 @@ export class UIManager {
       <section class="title-screen title-character-screen">
         <div class="title-orbit" aria-hidden="true"></div>
         <div class="character-select">
-          <div class="title-device-mode">${this.renderDeviceModeSwitch()}</div>
           <div class="character-heading">
             <span>${heading.label}</span>
             <strong>${heading.title}</strong>
@@ -467,6 +476,23 @@ export class UIManager {
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='load-meta']").forEach((button) => {
       button.addEventListener("click", () => this.game.loadMetaProgress());
+    });
+    this.root.querySelectorAll<HTMLSelectElement>("[data-role='castle-version-select']").forEach((select) => {
+      select.addEventListener("change", () => {
+        this.selectedConversationVersion = select.value;
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='open-castle-dialogue']").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.castleNotice = "まだ未実装です";
+        if (this.castleNoticeTimer !== null) window.clearTimeout(this.castleNoticeTimer);
+        this.render();
+        this.castleNoticeTimer = window.setTimeout(() => {
+          this.castleNotice = "";
+          this.castleNoticeTimer = null;
+          this.render();
+        }, 1400);
+      });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='conquest-next']").forEach((button) => {
       button.addEventListener("click", () => {
