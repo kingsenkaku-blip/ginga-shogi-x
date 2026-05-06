@@ -91,7 +91,10 @@ export class UIManager {
   private enemySkillBannerClearTimer: number | null = null;
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
   private forceIpadMode = false;
+
+ main
 
   constructor(
     private readonly root: HTMLElement,
@@ -101,7 +104,10 @@ export class UIManager {
     this.debugEnabled = options.debugEnabled ?? false;
     this.debugOpen = this.debugEnabled;
     this.ipadMode = UIManager.detectIpadMode();
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
     this.forceIpadMode = this.ipadMode;
+
+ main
 
     window.addEventListener("keydown", (event) => {
       const target = event.target as HTMLElement | null;
@@ -126,10 +132,13 @@ export class UIManager {
     return /iPad/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
 
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
   private isIpadUiEnabled(): boolean {
     return this.forceIpadMode;
   }
 
+
+ main
   render(): void {
     if (this.game.phase === "title") {
       this.root.innerHTML = `
@@ -176,16 +185,26 @@ export class UIManager {
         </div>
       </section>
 
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
       <aside class="side-panel ${this.isIpadUiEnabled() ? "ipad-mode" : ""}">
         ${
           this.isIpadUiEnabled()
+
+      <aside class="side-panel ${this.ipadMode ? "ipad-mode" : ""}">
+        ${
+          this.ipadMode
+ main
             ? `<div class="ipad-panel-switch" role="tablist" aria-label="iPad表示切替">
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "status" ? "active" : ""}" data-command="show-status-panel">戦況</button>
                 <button type="button" class="ipad-panel-button ${this.ipadPanelView === "log" ? "active" : ""}" data-command="show-log-panel">ログ</button>
               </div>`
             : ""
         }
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
+
+        <div class="status-panel-stack ${this.ipadMode && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
+ main
         <div class="panel-section">
           <h2>選択中</h2>
           ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
@@ -203,7 +222,11 @@ export class UIManager {
         ${this.renderCommandPanel()}
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
         </div>
+ codex/add-log-and-game-state-buttons-for-ipad-gak0ri
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
+
+        <div class="panel-section log-panel ${this.ipadMode && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
+ main
           <h2>行動ログ</h2>
           ${this.game.logs.map((entry) => this.renderLog(entry)).join("")}
         </div>
