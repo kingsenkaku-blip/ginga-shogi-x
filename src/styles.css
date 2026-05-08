@@ -676,6 +676,7 @@ h3 {
   display: grid;
   place-items: center;
   z-index: 120;
+  pointer-events: auto;
 }
 
 .ipad-popup {
@@ -687,6 +688,7 @@ h3 {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
+  pointer-events: auto;
 }
 
 .ipad-popup-header {

@@ -91,7 +91,7 @@ export class UIManager {
   private enemySkillBannerClearTimer: number | null = null;
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
-  private ipadPopupView: "details" | "commands" | "spirits" | null = null;
+  private ipadPopupView: "details" | "commands" | "spirits" | "tower" | null = null;
   private forceIpadMode = false;
   private selectedConversationVersion = "alpha";
   private castleNotice = "";
@@ -609,16 +609,18 @@ export class UIManager {
         this.render();
       });
     });
-    this.root.querySelectorAll<HTMLButtonElement>("[data-ipad-popup='details'], [data-ipad-popup='commands'], [data-ipad-popup='spirits']").forEach((button) => {
+    this.root
+      .querySelectorAll<HTMLButtonElement>("[data-ipad-popup='details'], [data-ipad-popup='commands'], [data-ipad-popup='spirits'], [data-ipad-popup='tower']")
+      .forEach((button) => {
       button.addEventListener("click", () => {
         const popup = button.dataset.ipadPopup;
-        if (popup === "details" || popup === "commands" || popup === "spirits") {
+        if (popup === "details" || popup === "commands" || popup === "spirits" || popup === "tower") {
           this.ipadPopupView = popup;
           this.render();
         }
       });
-    });
-    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close").forEach((button) => {
+      });
+    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close,[data-command='close-ipad-popup']").forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -628,8 +630,6 @@ export class UIManager {
     });
     this.root.querySelectorAll<HTMLElement>(".ipad-popup-backdrop").forEach((backdrop) => {
       backdrop.addEventListener("click", () => {
-    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close,[data-command='close-ipad-popup']").forEach((button) => {
-      button.addEventListener("click", () => {
         this.ipadPopupView = null;
         this.render();
       });
@@ -803,13 +803,28 @@ export class UIManager {
           <strong>精霊</strong>
           <p>召霊チケット・契約精霊を見る</p>
         </button>
+        ${
+          this.game.towerRun.active
+            ? `<button type="button" class="ipad-action-card" data-ipad-popup="tower">
+                <strong>塔</strong>
+                <p>階層・報酬・進行状況を見る</p>
+              </button>`
+            : ""
+        }
       </div>
     `;
   }
 
   private renderIpadPopupOverlay(selected: { id: string } | undefined): string {
     if (!this.isIpadUiEnabled() || this.ipadPopupView === null) return "";
-    const title = this.ipadPopupView === "details" ? "詳細" : this.ipadPopupView === "commands" ? "コマンド" : "精霊";
+    const title =
+      this.ipadPopupView === "details"
+        ? "詳細"
+        : this.ipadPopupView === "commands"
+          ? "コマンド"
+          : this.ipadPopupView === "spirits"
+            ? "精霊"
+            : "塔";
     const body =
       this.ipadPopupView === "details"
         ? selected
@@ -817,7 +832,11 @@ export class UIManager {
           : `<p class="muted">未選択</p>`
         : this.ipadPopupView === "commands"
           ? this.renderCommandPanel()
-          : this.renderSpiritPanel();
+          : this.ipadPopupView === "spirits"
+            ? this.renderSpiritPanel()
+            : this.game.towerRun.active
+              ? this.renderTowerPanel()
+              : `<p class="muted">塔モードは未開始です。</p>`;
     return `
       <div class="ipad-popup-backdrop" data-command="close-ipad-popup">
         <section class="ipad-popup" role="dialog" aria-modal="true" aria-label="${title}">
