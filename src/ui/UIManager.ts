@@ -628,6 +628,8 @@ export class UIManager {
     });
     this.root.querySelectorAll<HTMLElement>(".ipad-popup-backdrop").forEach((backdrop) => {
       backdrop.addEventListener("click", () => {
+    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close,[data-command='close-ipad-popup']").forEach((button) => {
+      button.addEventListener("click", () => {
         this.ipadPopupView = null;
         this.render();
       });
