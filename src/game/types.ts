@@ -48,6 +48,24 @@ export type PieceType =
 export type AbilityRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Cursed";
 
 export type HeroId = "uesugiKenshin" | "mechaArmorChan" | "hoshiyomiKaguya" | "demonVolunteer";
+export type SpiritId = "flameEmpress" | "tsuchio" | "whiteLagoon" | "woodmanMonk" | "lightningLord";
+export type SpiritElement = "fire" | "earth" | "water" | "wood" | "metal";
+
+export interface SpiritDefinition {
+  id: SpiritId;
+  element: SpiritElement;
+  name: string;
+  title?: string;
+  alias?: string;
+  direction: string;
+}
+
+export interface SpiritRunState {
+  spiritTickets: number;
+  contractedSpiritIds: SpiritId[];
+  spiritLevels: Record<SpiritId, number>;
+  lastSpiritRollResult: string | null;
+}
 
 export interface HeroDefinition {
   id: HeroId;

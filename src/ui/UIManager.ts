@@ -211,6 +211,7 @@ export class UIManager {
           </div>
         </div>
         ${this.renderCommandPanel()}
+        ${this.renderSpiritPanel()}
         ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
         </div>
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
@@ -613,6 +614,9 @@ export class UIManager {
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='start-fusion-ticket']").forEach((button) => {
       button.addEventListener("click", () => this.game.startFusionFromTicket("player"));
     });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-command='spirit-gacha']").forEach((button) => {
+      button.addEventListener("click", () => this.game.rollSpiritGacha("player", true));
+    });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='cancel-fusion']").forEach((button) => {
       button.addEventListener("click", () => this.game.cancelFusionSelection());
     });
@@ -741,6 +745,25 @@ export class UIManager {
         </button>
       </div>
     `;
+  }
+
+  private renderSpiritPanel(): string {
+    const state = this.game.spiritRunState;
+    const list = [
+      ["flameEmpress", "フレイムエンプレス"],
+      ["tsuchio", "土男"],
+      ["whiteLagoon", "ホワイトラグーン"],
+      ["woodmanMonk", "ウッドマン"],
+      ["lightningLord", "ライトニングロード"],
+    ] as const;
+    return `<div class="panel-section"><h2>召霊</h2>
+      <p>チケット: ${state.spiritTickets}</p>
+      <div class="tag-list compact">${list.map(([id, label]) => `<span>${label} Lv${state.spiritLevels[id]}</span>`).join("")}</div>
+      <p class="muted">${this.escapeHtml(state.lastSpiritRollResult ?? "最後の召霊結果: なし")}</p>
+      <button class="command-button" data-command="spirit-gacha" ${state.spiritTickets > 0 ? "" : "disabled"}>
+        <span>召霊ガチャ</span><small>${state.spiritTickets > 0 ? "チケットを1枚消費" : "チケット不足"}</small>
+      </button>
+    </div>`;
   }
 
   private renderTowerPanel(): string {

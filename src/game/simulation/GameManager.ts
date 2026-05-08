@@ -4,6 +4,7 @@ import { Board } from "./Board";
 import { SpecialEffectManager } from "./SpecialEffectManager";
 import { ABILITY_DEFINITIONS } from "../content/abilityDefinitions";
 import { HERO_DEFINITIONS, HERO_LIST } from "../content/heroDefinitions";
+import { SPIRIT_BY_ID, SPIRIT_DEFINITIONS, SPIRIT_IDS } from "../content/spiritDefinitions";
 import { PIECE_DEFINITIONS } from "../content/pieceDefinitions";
 import {
   COMMON_TOWER_NAMES,
@@ -39,6 +40,8 @@ import type {
   PieceType,
   PlayerId,
   SkillBannerState,
+  SpiritId,
+  SpiritRunState,
   TowerRestSpot,
   TowerRunState,
   TerrainType,
@@ -168,6 +171,12 @@ export class GameManager {
     player: 0,
     ai: 0,
   };
+  spiritRunState: SpiritRunState = {
+    spiritTickets: 0,
+    contractedSpiritIds: [],
+    spiritLevels: { flameEmpress: 0, tsuchio: 0, whiteLagoon: 0, woodmanMonk: 0, lightningLord: 0 },
+    lastSpiritRollResult: null,
+  };
   selectedHeroId: HeroId | null = null;
   gameMode: GameMode = "standard";
   heroSkillCharge = 0;
@@ -223,6 +232,7 @@ export class GameManager {
   start(): void {
     this.board.setupInitialPosition();
     this.phase = "title";
+    this.resetSpirits(true);
     this.log("銀河将棋X、起動。", "system");
     this.notify();
   }
@@ -861,7 +871,7 @@ export class GameManager {
     const definition = this.abilityOffers.find((offer) => offer.id === abilityId);
     if (!definition || this.phase === "gameover") return;
 
-    const message = new Ability(definition).apply(this, this.currentPlayer);
+    const message = new Ability(this.applySpiritToAbility(definition, this.currentPlayer)).apply(this, this.currentPlayer);
     this.log(message, this.currentPlayer);
     this.abilityOffers = [];
     if (this.phase !== "fusion") {
@@ -1134,6 +1144,10 @@ export class GameManager {
       piece.specialCooldown = 2;
       this.emitVisualEffect({ kind: "godSummon", coord: { ...piece.position }, owner });
     }
+    if (owner === "player" && (this.spiritRunState.spiritLevels.woodmanMonk ?? 0) > 0 && Math.random() < 0.25) {
+      const pawn = this.board.addPiece("pawn", owner, this.board.findSummonSpot(owner) ?? position);
+      if (pawn) this.log("坊主の根張り: 歩兵が追加召喚されました。", "player");
+    }
     return piece;
   }
 
@@ -1314,7 +1328,7 @@ export class GameManager {
     const [name = "", ...args] = command.split(/\s+/);
     switch (name.toLowerCase()) {
       case "help":
-        return "commands: spawn [player|ai] <piece> [x y], card [player|ai] [abilityId...], mecha [player|ai] [upgrade], process [player], usb [player|ai] [count], terrain <type> [count] [owner], hp <owner> <amount>, enemyhp1, damage <owner> <amount>, turn <owner>, promote <owner>, tower [start|next|+5|floor|clear|boss] [floor], castle [start|next|+5|floor|clear|boss] [floor], save, load, clear";
+        return "commands: spawn [player|ai] <piece> [x y], card [player|ai] [abilityId...], mecha [player|ai] [upgrade], process [player], usb [player|ai] [count], spirit [help], terrain <type> [count] [owner], hp <owner> <amount>, enemyhp1, damage <owner> <amount>, turn <owner>, promote <owner>, tower [start|next|+5|floor|clear|boss] [floor], castle [start|next|+5|floor|clear|boss] [floor], save, load, clear";
       case "spawn":
       case "summon":
         return this.debugCommandSpawn(args);
@@ -1335,6 +1349,8 @@ export class GameManager {
         return "DEBUG: process execution console opened.";
       case "usb":
         return this.debugCommandUsb(args);
+      case "spirit":
+        return this.debugSpiritCommand(args);
       case "terrain":
       case "tile":
         return this.debugCommandTerrain(args);
@@ -1662,6 +1678,70 @@ export class GameManager {
       return `DEBUG: tower floor => ${floor}F.`;
   }
 
+  rollSpiritGacha(owner: PlayerId = "player", consumeTicket = true): string {
+    if (owner !== "player") return "召霊はプレイヤー専用です。";
+    if (consumeTicket && this.spiritRunState.spiritTickets <= 0) return "召霊チケットがありません";
+    if (consumeTicket) this.spiritRunState.spiritTickets -= 1;
+    if (Math.random() < 0.75) {
+      this.nextOfferBonus.player = Math.min(2, this.nextOfferBonus.player + 1);
+      const msg = "召霊ガチャ: カード強化が発生しました。次の能力カード提示が強化されます。";
+      this.spiritRunState.lastSpiritRollResult = msg;
+      this.log(msg, "system");
+      this.notify();
+      return msg;
+    }
+    const pick = SPIRIT_IDS[Math.floor(Math.random() * SPIRIT_IDS.length)];
+    return this.contractSpirit(pick);
+  }
+
+  private contractSpirit(id: SpiritId): string {
+    const spirit = SPIRIT_BY_ID[id];
+    const current = this.spiritRunState.spiritLevels[id] ?? 0;
+    let msg = "";
+    if (current <= 0) {
+      this.spiritRunState.spiritLevels[id] = 1;
+      this.spiritRunState.contractedSpiritIds = Array.from(new Set([...this.spiritRunState.contractedSpiritIds, id]));
+      msg = `召霊ガチャ: ${spirit.name} と契約しました。`;
+    } else if (current < 3) {
+      this.spiritRunState.spiritLevels[id] = current + 1;
+      msg = `召霊ガチャ: ${spirit.name} のLvが${current + 1}になりました。`;
+    } else {
+      this.spiritRunState.spiritTickets += 1;
+      msg = `召霊ガチャ: ${spirit.name} はLv最大のため、召霊チケット+1に変換されました。`;
+    }
+    if (SPIRIT_IDS.every((spiritId) => (this.spiritRunState.spiritLevels[spiritId] ?? 0) > 0)) {
+      this.log("五大精霊が揃いました。特別解放は未実装です。", "system");
+    }
+    this.spiritRunState.lastSpiritRollResult = msg;
+    this.log(msg, "system");
+    this.notify();
+    return msg;
+  }
+
+  private debugSpiritCommand(args: string[]): string {
+    const sub = args[0] ?? "help";
+    if (sub === "roll") return this.rollSpiritGacha("player", args[1] !== "free");
+    if (sub === "ticket") {
+      const token = args[1];
+      if (!token) return "DEBUG: usage spirit ticket +N | N";
+      if (/^\+\d+$/.test(token)) this.spiritRunState.spiritTickets += this.parseDebugInt(token.slice(1), 0);
+      else if (/^\d+$/.test(token)) this.spiritRunState.spiritTickets = this.parseDebugInt(token, 0);
+      else return "DEBUG: ticket値が不正です。";
+      this.notify(); return `DEBUG: spirit tickets => ${this.spiritRunState.spiritTickets}`;
+    }
+    if (sub === "set" && args[1] && SPIRIT_IDS.includes(args[1] as SpiritId)) return this.contractSpirit(args[1] as SpiritId);
+    if (sub === "level" && args[1] && SPIRIT_IDS.includes(args[1] as SpiritId)) {
+      const lv = Math.max(0, Math.min(3, this.parseDebugInt(args[2], 1)));
+      this.spiritRunState.spiritLevels[args[1] as SpiritId] = lv;
+      this.spiritRunState.contractedSpiritIds = SPIRIT_IDS.filter((id) => (this.spiritRunState.spiritLevels[id] ?? 0) > 0);
+      this.notify(); return `DEBUG: ${args[1]} level => ${lv}`;
+    }
+    if (sub === "all") { SPIRIT_IDS.forEach((id) => (this.spiritRunState.spiritLevels[id] = Math.max(1, this.spiritRunState.spiritLevels[id] ?? 0))); this.spiritRunState.contractedSpiritIds = [...SPIRIT_IDS]; this.log("五大精霊が揃いました。特別解放は未実装です。", "system"); this.notify(); return "DEBUG: all spirits contracted."; }
+    if (sub === "clear") { this.resetSpirits(args[1] === "all"); this.notify(); return "DEBUG: spirits cleared."; }
+    if (sub === "list") return `DEBUG: tickets=${this.spiritRunState.spiritTickets} / ${SPIRIT_DEFINITIONS.map((s) => `${s.id}:Lv${this.spiritRunState.spiritLevels[s.id]}`).join(", ")}`;
+    return "spirit help: roll | roll free | ticket +N | ticket N | list | set <id> | level <id> <0-3> | all | clear [all]";
+  }
+
   private parseDebugCoord(xToken?: string, yToken?: string): Coord | undefined {
     if (!xToken || !yToken) return undefined;
     const x = Number(xToken);
@@ -1700,6 +1780,28 @@ export class GameManager {
 
   private isTerrainType(value: string | undefined): value is TerrainType {
     return value === "heal" || value === "trap" || value === "warp" || value === "summon" || value === "divine" || value === "lava" || value === "curse";
+  }
+
+  private applySpiritToAbility(definition: AbilityDefinition, owner: PlayerId): AbilityDefinition {
+    if (owner !== "player") return definition;
+    const get = (id: SpiritId): number => this.spiritRunState.spiritLevels[id] ?? 0;
+    const effect = definition.effect;
+    if (effect.type === "damageEnemyBase" && get("flameEmpress") > 0) return { ...definition, effect: { ...effect, amount: effect.amount + 4 } };
+    if (effect.type === "healBase" && get("tsuchio") > 0) return { ...definition, effect: { ...effect, amount: effect.amount + 6 } };
+    if (effect.type !== "terrain") return definition;
+    const bonus =
+      (effect.terrainType === "lava" && get("flameEmpress") > 0 ? 1 : 0) +
+      (effect.terrainType === "trap" && get("tsuchio") > 0 ? 1 : 0) +
+      (effect.terrainType === "heal" && get("whiteLagoon") > 0 ? 1 : 0) +
+      (effect.terrainType === "warp" && get("whiteLagoon") > 0 ? 1 : 0);
+    return bonus > 0 ? { ...definition, effect: { ...effect, count: effect.count + bonus } } : definition;
+  }
+
+  private resetSpirits(withTicketReset: boolean): void {
+    if (withTicketReset) this.spiritRunState.spiritTickets = 0;
+    this.spiritRunState.contractedSpiritIds = [];
+    this.spiritRunState.spiritLevels = { flameEmpress: 0, tsuchio: 0, whiteLagoon: 0, woodmanMonk: 0, lightningLord: 0 };
+    this.spiritRunState.lastSpiritRollResult = null;
   }
 
   private getBaseHpPercent(owner: PlayerId): number {
@@ -1744,6 +1846,7 @@ export class GameManager {
     const piece = candidates[Math.floor(Math.random() * candidates.length)];
     if (!piece) return `${sourceName}: 対象にできるコマがありません。`;
     piece.extraActions += 1;
+    if (owner === "player" && (this.spiritRunState.spiritLevels.lightningLord ?? 0) > 0) piece.extraActions += 1;
     return `${sourceName}: ${this.getPieceDisplayName(piece)}が追加行動を得ました。`;
   }
 
