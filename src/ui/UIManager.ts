@@ -91,6 +91,7 @@ export class UIManager {
   private enemySkillBannerClearTimer: number | null = null;
   private readonly ipadMode: boolean;
   private ipadPanelView: "status" | "log" = "status";
+  private ipadPopupView: "details" | "commands" | "spirits" | null = null;
   private forceIpadMode = false;
   private selectedConversationVersion = "alpha";
   private castleNotice = "";
@@ -196,23 +197,27 @@ export class UIManager {
             : ""
         }
         <div class="status-panel-stack ${this.isIpadUiEnabled() && this.ipadPanelView === "log" ? "hidden-on-ipad" : ""}">
-        <div class="panel-section">
-          <h2>選択中</h2>
-          ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
-        </div>
-        <div class="panel-section">
-          <h2>永続能力</h2>
-          <div class="tag-list">
-            ${playerPassives.length ? playerPassives.map((label) => `<span>${label}</span>`).join("") : `<span>なし</span>`}
-          </div>
-          <h3>AI</h3>
-          <div class="tag-list compact">
-            ${aiPassives.length ? aiPassives.map((label) => `<span>${label}</span>`).join("") : `<span>なし</span>`}
-          </div>
-        </div>
-        ${this.renderCommandPanel()}
-        ${this.renderSpiritPanel()}
-        ${this.game.towerRun.active ? this.renderTowerPanel() : ""}
+          ${
+            this.isIpadUiEnabled()
+              ? this.renderIpadStatusCards(selected)
+              : `<div class="panel-section">
+                  <h2>選択中</h2>
+                  ${selected ? this.renderPieceDetails(selected.id) : `<p class="muted">未選択</p>`}
+                </div>
+                <div class="panel-section">
+                  <h2>永続能力</h2>
+                  <div class="tag-list">
+                    ${playerPassives.length ? playerPassives.map((label) => `<span>${label}</span>`).join("") : `<span>なし</span>`}
+                  </div>
+                  <h3>AI</h3>
+                  <div class="tag-list compact">
+                    ${aiPassives.length ? aiPassives.map((label) => `<span>${label}</span>`).join("") : `<span>なし</span>`}
+                  </div>
+                </div>
+                ${this.renderCommandPanel()}
+                ${this.renderSpiritPanel()}
+                ${this.game.towerRun.active ? this.renderTowerPanel() : ""}`
+          }
         </div>
         <div class="panel-section log-panel ${this.isIpadUiEnabled() && this.ipadPanelView !== "log" ? "hidden-on-ipad" : ""}">
           <h2>行動ログ</h2>
@@ -230,6 +235,7 @@ export class UIManager {
       ${this.game.phase === "mechaUpgrade" ? this.renderMechaUpgradeOverlay() : ""}
       ${this.game.phase === "processExecution" ? this.renderProcessExecutionOverlay() : ""}
       ${this.game.phase === "gameover" ? this.renderGameOver() : ""}
+      ${this.renderIpadPopupOverlay(selected)}
       ${this.debugEnabled ? this.renderDebugConsole() : ""}
     `;
 
@@ -576,12 +582,14 @@ export class UIManager {
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='show-log-panel']").forEach((button) => {
       button.addEventListener("click", () => {
         this.ipadPanelView = "log";
+        this.ipadPopupView = null;
         this.render();
       });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='show-status-panel']").forEach((button) => {
       button.addEventListener("click", () => {
         this.ipadPanelView = "status";
+        this.ipadPopupView = null;
         this.render();
       });
     });
@@ -589,6 +597,7 @@ export class UIManager {
       button.addEventListener("click", () => {
         this.forceIpadMode = true;
         this.ipadPanelView = "status";
+        this.ipadPopupView = null;
         this.render();
       });
     });
@@ -596,7 +605,36 @@ export class UIManager {
       button.addEventListener("click", () => {
         this.forceIpadMode = false;
         this.ipadPanelView = "status";
+        this.ipadPopupView = null;
         this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-ipad-popup='details'], [data-ipad-popup='commands'], [data-ipad-popup='spirits']").forEach((button) => {
+      button.addEventListener("click", () => {
+        const popup = button.dataset.ipadPopup;
+        if (popup === "details" || popup === "commands" || popup === "spirits") {
+          this.ipadPopupView = popup;
+          this.render();
+        }
+      });
+    });
+    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.ipadPopupView = null;
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>(".ipad-popup-backdrop").forEach((backdrop) => {
+      backdrop.addEventListener("click", () => {
+        this.ipadPopupView = null;
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>(".ipad-popup").forEach((popup) => {
+      popup.addEventListener("click", (event) => {
+        event.stopPropagation();
       });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='confirm-initiative']").forEach((button) => {
@@ -743,6 +781,50 @@ export class UIManager {
           <span>追加融合</span>
           <small>${fusionTicketLabel}</small>
         </button>
+      </div>
+    `;
+  }
+
+  private renderIpadStatusCards(selected: { id: string; hp: number; maxHp: number; definition: { name: string } } | undefined): string {
+    const selectedLabel = selected ? `${selected.definition.name} / HP ${selected.hp}/${selected.maxHp}` : "選択中の駒・HP・状態を見る";
+    return `
+      <div class="ipad-action-grid">
+        <button type="button" class="ipad-action-card" data-ipad-popup="details">
+          <strong>詳細</strong>
+          <p>${this.escapeHtml(selectedLabel)}</p>
+        </button>
+        <button type="button" class="ipad-action-card" data-ipad-popup="commands">
+          <strong>コマンド</strong>
+          <p>スキル・融合・特殊操作を使う</p>
+        </button>
+        <button type="button" class="ipad-action-card" data-ipad-popup="spirits">
+          <strong>精霊</strong>
+          <p>召霊チケット・契約精霊を見る</p>
+        </button>
+      </div>
+    `;
+  }
+
+  private renderIpadPopupOverlay(selected: { id: string } | undefined): string {
+    if (!this.isIpadUiEnabled() || this.ipadPopupView === null) return "";
+    const title = this.ipadPopupView === "details" ? "詳細" : this.ipadPopupView === "commands" ? "コマンド" : "精霊";
+    const body =
+      this.ipadPopupView === "details"
+        ? selected
+          ? this.renderPieceDetails(selected.id)
+          : `<p class="muted">未選択</p>`
+        : this.ipadPopupView === "commands"
+          ? this.renderCommandPanel()
+          : this.renderSpiritPanel();
+    return `
+      <div class="ipad-popup-backdrop" data-command="close-ipad-popup">
+        <section class="ipad-popup" role="dialog" aria-modal="true" aria-label="${title}">
+          <header class="ipad-popup-header">
+            <h2>${title}</h2>
+            <button type="button" class="ipad-popup-close" data-command="close-ipad-popup">閉じる</button>
+          </header>
+          <div class="ipad-popup-body">${body}</div>
+        </section>
       </div>
     `;
   }
