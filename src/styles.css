@@ -638,6 +638,77 @@ h3 {
   padding-right: 4px;
 }
 
+.ipad-action-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.ipad-action-card {
+  width: 100%;
+  min-height: 88px;
+  text-align: left;
+  padding: 14px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(242, 196, 93, 0.32);
+  background: rgba(20, 28, 36, 0.88);
+  color: #f6efe1;
+}
+
+.ipad-action-card strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffe0a1;
+  font-size: 16px;
+}
+
+.ipad-action-card p {
+  color: rgba(246, 239, 225, 0.78);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.ipad-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+  background: rgba(7, 10, 12, 0.58);
+  display: grid;
+  place-items: center;
+  z-index: 120;
+}
+
+.ipad-popup {
+  width: min(520px, calc(100vw - 28px));
+  max-height: min(72vh, 620px);
+  background: rgba(11, 17, 24, 0.98);
+  border-radius: 12px;
+  border: 1px solid rgba(242, 196, 93, 0.32);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.ipad-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 246, 220, 0.16);
+}
+
+.ipad-popup-body {
+  overflow: auto;
+  padding: 12px 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.ipad-popup-close {
+  margin: 0;
+}
+
 .log {
   margin-bottom: 8px;
   padding: 8px 9px;
