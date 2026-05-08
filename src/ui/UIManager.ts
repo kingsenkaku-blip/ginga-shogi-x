@@ -618,10 +618,25 @@ export class UIManager {
         }
       });
     });
+    this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.ipadPopupView = null;
+        this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>(".ipad-popup-backdrop").forEach((backdrop) => {
+      backdrop.addEventListener("click", () => {
     this.root.querySelectorAll<HTMLButtonElement>(".ipad-popup-close,[data-command='close-ipad-popup']").forEach((button) => {
       button.addEventListener("click", () => {
         this.ipadPopupView = null;
         this.render();
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>(".ipad-popup").forEach((popup) => {
+      popup.addEventListener("click", (event) => {
+        event.stopPropagation();
       });
     });
     this.root.querySelectorAll<HTMLButtonElement>("[data-command='confirm-initiative']").forEach((button) => {
